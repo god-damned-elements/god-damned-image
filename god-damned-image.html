@@ -1,0 +1,174 @@
+<link rel="import" href="../polymer/polymer-element.html">
+<link rel="import" href="../device-orientation/device-orientation.html">
+
+<dom-module id="god-damned-image">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      #imageContainer{
+        display:block;
+        width:100px;
+        height:100px;
+        min-width:100px;
+        min-height:100px;
+        max-width:100px;
+        max-height:100px;
+        overflow:hidden;
+        background:red;
+        
+      }
+      #imageWrapper{
+        display:block;
+        width:100%;
+        height:100%;
+        min-width:100%;
+        min-height:100%;
+        background:Red;
+        /*perspective:1000px;*/
+        /*-webkit-perspective: 100px ;*/
+        background-size:cover;
+        
+      }
+      img{
+        visibility:hidden;
+      }
+    </style>
+    <device-orientation orientation="{{orientation}}"></device-orientation>
+    
+    <div id="imageContainer">
+    <div id="imageWrapper">
+      <img id="image" src$="{{src}}" srcset$="{{srcset}}" alt$="{{alt}}"/>
+    </div>
+    </div>
+    <div>gamma: {{orientation.gamma}}</div>
+    <div>beta: {{orientation.beta}}</div>
+    <div>meanY: {{means.y.mean}}/{{means.y.variance}}</div>
+    <div>meanX: {{means.x.mean}}/{{means.x.variance}}</div>
+    
+    <button on-click="reload">reload</button>
+  </template>
+
+  <script>
+  function createMeanCalculator(){
+    var n=0,S=0.0,m=0.0,mPrev=0;
+    return function(x){
+      n = n+1;
+      mPrev = m;
+      m = m + ( x - m) / n;
+      S = S + (x-m)*(x-mPrev);
+      return {mean: m, variance: Math.sq rt(S/n) }
+    }
+  }
+    /**
+     * `god-damned-image`
+     * Yet Another Magical Image Element.
+     *
+     * @customElement
+     * @polymer
+     * @demo demo/index.html
+     */
+    class GodDamnedImage extends Polymer.Element {
+      static get is() { return 'god-damned-image'; }
+      static get properties() {
+        return {
+          src: {
+            type: String,
+            reflectToAttribute: true,
+            value: 'http://fillmurray.com/200/300',
+            observer: '_setImageSrc'
+          },
+          srcset: {
+            type: String,
+            reflectToAttribute: true
+            
+          },
+          alt: {
+            type: String,
+            reflectToAttribute: true
+          },
+          imageLoaded: {
+            type: Boolean,
+            notify: true,
+            value: false
+          },
+          sizing: {
+            type: String,
+            reflectToAttribute: true,
+            value: null
+          },
+          means: {
+            type: Object,
+            value: function(){
+              return {};
+            }
+          },
+          orientation: {
+            type: Object,
+            value: function(){
+              return {};
+            },
+            observer:'_onOrientationChanged'
+          }
+          
+        };
+      }
+      
+      _setImageSrc(src){
+        this.$.imageWrapper.style.backgroundImage = 'url('+src+')';
+      }
+      
+      _onOrientationChanged(e){
+        var clampMin = -30;
+        var clampMax = 30;
+        var meanY = this.__meanY(e.gamma||0);
+        var meanX = this.__meanX(e.beta||0);
+        var adjGamma = parseInt(e.gamma) //+ meanY;
+        var adjBeta = parseInt(e.beta)// + meanX;
+        var y = Math.min(Math.max(adjGamma, clampMin), clampMax);
+        var x = Math.min(Math.max(adjBeta, clampMin), clampMax);
+        
+        this.means = {y: meanY, x: meanX, xx: x, yy: y}
+        this.$.imageWrapper.style.transform =
+            "rotateY(" + ( -y ) + "deg)" +
+            "rotateX(" + x + "deg) "; //+
+            
+            // "rotateZ(" + - ( e.alpha - 180 ) + "deg) ";
+        
+      }
+      
+      reload(){
+        window.location.reload(true);
+      }
+      
+      _fadeImage(){
+        if(this.sizing === null){
+          this.$.imageWrapper.classList.add('visible');   
+        }
+        
+      }
+      
+      constructor(){
+        super();
+        this.__meanY = createMeanCalculator();
+        this.__meanX = createMeanCalculator();
+      }
+      
+      
+      connectedCallback(){
+        super.connectedCallback();
+        this.$.image.addEventListener('loaded', ( event )=>{
+          this.imageLoaded = true;
+        } , { once: true });
+      }
+      
+      disconnectedCallback(){
+        super.disconnectedCallback();
+        this.imageLoaded = false;
+      }
+    }
+
+    window.customElements.define(GodDamnedImage.is, GodDamnedImage);
+  </script>
+</dom-module>
