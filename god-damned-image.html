@@ -388,7 +388,10 @@
       
       _setBgImageSrc(src){
         console.log('_setBgImageSrc',src)
-        this.$.imageWrapper.style.backgroundImage = 'url('+src+')';
+        if(src && src !== null){
+          this.$.imageWrapper.style.backgroundImage = 'url('+src+')';  
+        }
+        
       }
       
       
