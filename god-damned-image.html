@@ -357,7 +357,7 @@
       }
       
       _setPlaceHolderBg(direction,colors){
-        console.log('_setPlaceHolderBg');
+        // //console.log('_setPlaceHolderBg');
         var defColors = ['#AAA','#CCC','#EEE']
         if(!colors) colors = [];
         while(colors.length < 3){
@@ -370,7 +370,7 @@
       }
       
       _setContainerHeight(usesImageHeight){
-        console.log('_setContainerHeight');
+        //console.log('_setContainerHeight');
         if(usesImageHeight === true){
           this.$.imageContainer.classList.add('use-image-height');
           this.$.imageContainer.classList.remove('use-parent-height');
@@ -387,7 +387,7 @@
       }
       
       _setBgImageSrc(src){
-        console.log('_setBgImageSrc',src)
+        //console.log('_setBgImageSrc',src)
         if(src && src !== null){
           this.$.imageWrapper.style.backgroundImage = 'url('+src+')';  
         }
@@ -471,7 +471,7 @@
       }
     
       _onImageLoadedChanged(isLoaded){
-        console.log('_onImageLoadedChanged', isLoaded);
+        //console.log('_onImageLoadedChanged', isLoaded);
         if(isLoaded){
           if(!this.hideImageOnLoad){
             
@@ -517,7 +517,7 @@
       constructor(){
         super();
         this._loadEventHandler = ( event )=>{
-          console.log('loaded', event)
+          //console.log('loaded', event)
           this.imageLoaded = true;
           this.currentSrc = this.$.image.currentSrc || this.$.image.src;
         }
